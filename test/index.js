@@ -12,6 +12,16 @@ test('existing email: should respond with an object where success is true', t =>
   })
 })
 
+test('existing email check promise: should respond with an object where success is true', async t => {
+  let info = {}
+  try { info = await verifier.verify('rob@below.io') } catch (e) {
+    console.log('e', e)
+    t.false(e, 'Not throwing an error')
+  }
+  t.true(info.success, 'Success true')
+  t.end()
+})
+
 test('non-existing email: should respond with an object where success is false', t => {
   verifier.verify('antirob@below.io', function (err, info) {
     t.false(err, 'No error returned')
