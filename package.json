@@ -34,7 +34,7 @@
     "pre-compiled": {
       "dir": ".build",
       "files": [
-        "lib/index.js"
+        "src/index.js"
       ]
     }
   },

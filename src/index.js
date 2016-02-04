@@ -5,7 +5,16 @@ import net from 'net'
 let verifier = {}
 
 verifier.verify = (email, options, callback) => new Promise((resolve, reject) => {
-  // Handle optional parameters
+  let calledback = false
+  let cb = (err, info) => {
+    if (!calledback) {
+      calledback = true
+      callback && callback(err, info)
+      if (err) return reject(err)
+      resolve(info)
+    }
+  }
+
   if (!email) {
     throw new Error('Missing parameters in email-verify.verify()')
   } else if (typeof options === 'function') {
@@ -22,13 +31,11 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
   }, options)
 
   if (!validator.validate(email)) {
-    let response = { success: false, info: 'Invalid Email Structure', addr: email }
-    callback && callback(null, response)
-    return resolve(response)
+    return cb(null, { success: false, info: 'Invalid Email Structure', addr: email })
   }
 
   // Get the domain of the email address
-  var domain = email.split(/[@]/)[1]
+  let domain = email.split(/[@]/)[1]
 
   if (options.dns) {
     try {
@@ -45,40 +52,31 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
   // Get the MX Records to find the SMTP server
   dns.resolveMx(domain, function (err, addresses) {
     if (err || (typeof addresses === 'undefined')) {
-      callback && callback(err, null)
-      reject(err)
+      cb(err, null)
     } else if (addresses && addresses.length <= 0) {
-      let response = { success: false, info: 'No MX Records' }
-      callback(null, response)
-      resolve(response)
+      cb(null, { success: false, info: 'No MX Records' })
     } else {
       // Find the lowest priority mail server
-      var priority = 10000
-      var index = 0
-      for (var i = 0; i < addresses.length; i++) {
+      let priority = 10000
+      let index = 0
+      for (let i = 0; i < addresses.length; i++) {
         if (addresses[i].priority < priority) {
           priority = addresses[i].priority
           index = i
         }
       }
-      var smtp = addresses[index].exchange
-      var stage = 0
+      let smtp = addresses[index].exchange
+      let stage = 0
 
-      var socket = net.createConnection(options.port, smtp)
-      var success = false
-      var response = ''
-      var completed = false
-      var calledback = false
-      var ended = false
+      let socket = net.createConnection(options.port, smtp)
+      let success = false
+      let response = ''
+      let completed = false
+      let ended = false
 
       if (options.timeout > 0) {
         socket.setTimeout(options.timeout, function () {
-          if (!calledback) {
-            calledback = true
-            let response = { success: false, info: 'Connection Timed Out', addr: email }
-            callback && callback(null, response)
-            resolve(response)
-          }
+          cb(null, { success: false, info: 'Connection Timed Out', addr: email })
           socket.destroy()
         })
       }
@@ -140,27 +138,18 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
 
       }).on('error', function (err) {
         ended = true
-        if (!calledback) {
-          let response = { success: false, info: null, addr: email }
-          calledback = true
-          callback && callback(err, response)
-          resolve(response)
-        }
+        cb(err, { success: false, info: null, addr: email })
       }).on('end', function () {
         ended = true
-        if (!calledback) {
-          let response = {
-            success: success,
-            info: (email + ' is ' + (success ? 'a valid' : 'an invalid') + ' address'),
-            addr: email
-          }
-          calledback = true
-          callback && callback(null, response)
-          resolve(response)
-        }
+        cb(null, {
+          success: success,
+          info: (email + ' is ' + (success ? 'a valid' : 'an invalid') + ' address'),
+          addr: email
+        })
       })
     }
   })
+
   return true
 })
 
