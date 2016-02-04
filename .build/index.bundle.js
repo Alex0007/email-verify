@@ -87,6 +87,7 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
       }
 
       socket.on('data', function (data) {
+        console.log('data', data.toString())
         response += data.toString()
         completed = response.slice(-1) === '\n'
 

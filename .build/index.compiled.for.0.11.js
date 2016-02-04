@@ -100,6 +100,7 @@ verifier.verify = function (email, options, callback) {
           }
 
           socket.on('data', function (data) {
+            console.log('data', data.toString());
             response += data.toString();
             completed = response.slice(-1) === '\n';
 
