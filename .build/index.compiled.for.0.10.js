@@ -88,6 +88,7 @@ verifier.verify = function (email, options, callback) {
 
           var socket = net.createConnection(options.port, smtp);
           var success = false;
+          var log = '';
           var response = '';
           var completed = false;
           var ended = false;
@@ -100,7 +101,7 @@ verifier.verify = function (email, options, callback) {
           }
 
           socket.on('data', function (data) {
-            response += data.toString();
+            log += response = data.toString();
             completed = response.slice(-1) === '\n';
 
             if (completed) {
@@ -110,7 +111,6 @@ verifier.verify = function (email, options, callback) {
                     // Connection Worked
                     socket.write('EHLO ' + options.fqdn + '\r\n', function () {
                       stage++;
-                      response = '';
                     });
                   } else {
                     socket.end();
@@ -121,7 +121,6 @@ verifier.verify = function (email, options, callback) {
                     // Connection Worked
                     socket.write('MAIL FROM:<' + options.sender + '>\r\n', function () {
                       stage++;
-                      response = '';
                     });
                   } else {
                     socket.end();
@@ -132,7 +131,6 @@ verifier.verify = function (email, options, callback) {
                     // MAIL Worked
                     socket.write('RCPT TO:<' + email + '>\r\n', function () {
                       stage++;
-                      response = '';
                     });
                   } else {
                     socket.end();
@@ -144,7 +142,7 @@ verifier.verify = function (email, options, callback) {
                     success = true;
                   }
                   stage++;
-                  response = '';
+
                   // close the connection cleanly.
                   if (!ended) socket.write('QUIT\r\n');
                   break;
@@ -161,7 +159,7 @@ verifier.verify = function (email, options, callback) {
               success: success,
               info: email + ' is ' + (success ? 'a valid' : 'an invalid') + ' address',
               addr: email,
-              response: response
+              debug: log
             });
           });
         })();

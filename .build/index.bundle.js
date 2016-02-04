@@ -75,6 +75,7 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
 
       let socket = net.createConnection(options.port, smtp)
       let success = false
+      let log = ''
       let response = ''
       let completed = false
       let ended = false
@@ -87,7 +88,7 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
       }
 
       socket.on('data', function (data) {
-        response += data.toString()
+        log += response = data.toString()
         completed = response.slice(-1) === '\n'
 
         if (completed) {
@@ -97,7 +98,6 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
                 // Connection Worked
                 socket.write('EHLO ' + options.fqdn + '\r\n', function () {
                   stage++
-                  response = ''
                 })
               } else {
                 socket.end()
@@ -108,7 +108,6 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
                 // Connection Worked
                 socket.write('MAIL FROM:<' + options.sender + '>\r\n', function () {
                   stage++
-                  response = ''
                 })
               } else {
                 socket.end()
@@ -119,7 +118,6 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
                 // MAIL Worked
                 socket.write('RCPT TO:<' + email + '>\r\n', function () {
                   stage++
-                  response = ''
                 })
               } else {
                 socket.end()
@@ -131,8 +129,8 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
                 success = true
               }
               stage++
-              response = ''
-                // close the connection cleanly.
+
+              // close the connection cleanly.
               if (!ended) socket.write('QUIT\r\n')
               break
             case 4:
@@ -150,7 +148,7 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
           success: success,
           info: (email + ' is ' + (success ? 'a valid' : 'an invalid') + ' address'),
           addr: email,
-          response: response
+          debug: log
         })
       })
     }
