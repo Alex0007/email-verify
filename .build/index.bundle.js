@@ -2,34 +2,38 @@
 
 var validator = require('email-validator');
 validator = 'default' in validator ? validator['default'] : validator;
+var dns = require('dns');
+dns = 'default' in dns ? dns['default'] : dns;
+var net = require('net');
+net = 'default' in net ? net['default'] : net;
 
 let verifier = {}
 
-verifier.verify = (email, options, callback) => {
+verifier.verify = (email, options, callback) => new Promise((resolve, reject) => {
   // Handle optional parameters
-  if (!email || !options) {
+  if (!email) {
     throw new Error('Missing parameters in email-verify.verify()')
-  } else if (typeof callback === 'undefined' && options) {
+  } else if (typeof options === 'function') {
     callback = options
-    options = {}
   }
 
-  // Default Values
-  if (options && !options.port) options.port = 25
-  if (options && !options.sender) options.sender = 'name@example.org'
-  if (options && !options.timeout) options.timeout = 0
-  if (options && !options.fqdn) options.fqdn = 'mail.example.org'
-  if (options && (!options.ignore || typeof options.ignore !== 'number')) options.ignore = false
+  // extend options default values
+  options = Object.assign({}, {
+    port: 25,
+    sender: 'name@example.org',
+    timeout: 0,
+    fqdn: 'mail.example.org',
+    ignore: false
+  }, options)
 
   if (!validator.validate(email)) {
-    callback(null, { success: false, info: 'Invalid Email Structure', addr: email })
-    return false
+    let response = { success: false, info: 'Invalid Email Structure', addr: email }
+    callback && callback(null, response)
+    return resolve(response)
   }
 
   // Get the domain of the email address
   var domain = email.split(/[@]/)[1]
-
-  var dns = require('dns')
 
   if (options.dns) {
     try {
@@ -46,9 +50,12 @@ verifier.verify = (email, options, callback) => {
   // Get the MX Records to find the SMTP server
   dns.resolveMx(domain, function (err, addresses) {
     if (err || (typeof addresses === 'undefined')) {
-      callback(err, null)
+      callback && callback(err, null)
+      reject(err)
     } else if (addresses && addresses.length <= 0) {
-      callback(null, { success: false, info: 'No MX Records' })
+      let response = { success: false, info: 'No MX Records' }
+      callback(null, response)
+      resolve(response)
     } else {
       // Find the lowest priority mail server
       var priority = 10000
@@ -62,7 +69,6 @@ verifier.verify = (email, options, callback) => {
       var smtp = addresses[index].exchange
       var stage = 0
 
-      var net = require('net')
       var socket = net.createConnection(options.port, smtp)
       var success = false
       var response = ''
@@ -74,11 +80,9 @@ verifier.verify = (email, options, callback) => {
         socket.setTimeout(options.timeout, function () {
           if (!calledback) {
             calledback = true
-            callback(null, {
-              success: false,
-              info: 'Connection Timed Out',
-              addr: email
-            })
+            let response = { success: false, info: 'Connection Timed Out', addr: email }
+            callback && callback(null, response)
+            resolve(response)
           }
           socket.destroy()
         })
@@ -142,23 +146,27 @@ verifier.verify = (email, options, callback) => {
       }).on('error', function (err) {
         ended = true
         if (!calledback) {
+          let response = { success: false, info: null, addr: email }
           calledback = true
-          callback(err, { success: false, info: null, addr: email })
+          callback && callback(err, response)
+          resolve(response)
         }
       }).on('end', function () {
         ended = true
         if (!calledback) {
-          calledback = true
-          callback(null, {
+          let response = {
             success: success,
             info: (email + ' is ' + (success ? 'a valid' : 'an invalid') + ' address'),
             addr: email
-          })
+          }
+          calledback = true
+          callback && callback(null, response)
+          resolve(response)
         }
       })
     }
   })
   return true
-}
+})
 
 module.exports = verifier;
