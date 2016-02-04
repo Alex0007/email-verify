@@ -1,30 +1,50 @@
 {
   "name": "email-verify",
-  "version": "0.0.17",
+  "version": "1.0.0",
   "description": "A tool to verify an email address exits via SMTP",
-  "main": "index.js",
+  "main": ".build/index.js",
   "dependencies": {
-    "email-validator": "1.0.1",
-    "lodash": "^4.0.0"
+    "email-validator": "1.0.4",
+    "lodash": "^4.0.0",
+    "pick-precompiled": "^1.0.2"
   },
   "devDependencies": {
-    "mocha": "1.21.5"
-  },
-  "bugs": {
-    "url": "https://github.com/bighappyworld/email-verify/issues"
+    "babel-core": "^6.4.5",
+    "babel-eslint": "^4.1.8",
+    "babel-plugin-transform-runtime": "^6.4.3",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-stage-0": "^6.3.13",
+    "pre-compiled": "^1.3.0",
+    "snazzy": "^2.0.1",
+    "standard": "^5.4.1",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.4.0"
   },
   "scripts": {
-    "test": "node test"
+    "postinstall": "pick-precompiled",
+    "build": "precompile",
+    "test": "npm run syntax && node -r babel-core/register test/",
+    "syntax": "standard --verbose | snazzy"
+  },
+  "config": {
+    "pre-compiled": {
+      "dir": ".build",
+      "files": [
+        "lib/index.js"
+      ]
+    }
+  },
+  "standard": {
+    "parser": "babel-eslint"
+  },
+  "bugs": {
+    "url": "https://github.com/Alex0007/email-verify/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bighappyworld/email-verify"
+    "url": "https://github.com/Alex0007/email-verify"
   },
-  "preferGlobal": true,
-  "bin": {
-    "email-verify": "./app.js"
-  },
-  "author": "Robert Oaks <rob@below.io> (http://below.io/)",
+  "author": "Alex0007 <Alex0007lolpvp@gmail.com>",
   "license": "ISC",
   "keywords": [
     "email",

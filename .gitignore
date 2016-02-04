@@ -1,15 +1,2 @@
-.DS_ignore
-
-node_modules/
-
-# Logs
-logs
-*.log
-
-# Runtime data
-pids
-*.pid
-*.seed
-
-# Text file containing address (Testing)
-*.txt
+node_modules
+npm-debug.log
