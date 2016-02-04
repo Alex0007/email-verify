@@ -160,7 +160,8 @@ verifier.verify = function (email, options, callback) {
             cb(null, {
               success: success,
               info: email + ' is ' + (success ? 'a valid' : 'an invalid') + ' address',
-              addr: email
+              addr: email,
+              response: response
             });
           });
         })();
