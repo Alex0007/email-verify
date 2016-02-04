@@ -26,6 +26,9 @@
     "test": "npm run syntax && node -r babel-core/register test/",
     "syntax": "standard --verbose | snazzy"
   },
+  "engines": {
+    "node": ">=0.10"
+  },
   "config": {
     "pre-compiled": {
       "dir": ".build",
