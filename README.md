@@ -54,13 +54,11 @@ The options are:
 
 ## Flow
 The basic flow is as follows:
-1. Validate it is a proper email address
-2. Get the domain of the email
-3. Grab the DNS MX records for that domain
-4. Create a TCP connection to the smtp server
-5. Send a EHLO message
-6. Send a MAIL FROM message
-7. Send a RCPT TO message
-8. If they all validate, return an object with success: true. If any stage fails, the callback object will have success: false.
-
-This module has tests with Mocha. Run `npm test` and make sure you have a solid connection.
+ 1. Validate it is a proper email address
+ 2. Get the domain of the email
+ 3. Grab the DNS MX records for that domain
+ 4. Create a TCP connection to the smtp server
+ 5. Send a EHLO message
+ 6. Send a MAIL FROM message
+ 7. Send a RCPT TO message
+ 8. If they all validate, return an object with success: true. If any stage fails, the callback object will have success: false.
