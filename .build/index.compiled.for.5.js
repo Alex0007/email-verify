@@ -110,7 +110,7 @@ verifier.verify = function (email, options, callback) {
                   if (response.indexOf('220') > -1 && !ended) {
                     // Connection Worked
                     socket.write('EHLO ' + options.fqdn + '\r\n', function () {
-                      stage++;
+                      return stage++;
                     });
                   } else {
                     socket.end();
@@ -120,7 +120,7 @@ verifier.verify = function (email, options, callback) {
                   if (response.indexOf('250') > -1 && !ended) {
                     // Connection Worked
                     socket.write('MAIL FROM:<' + options.sender + '>\r\n', function () {
-                      stage++;
+                      return stage++;
                     });
                   } else {
                     socket.end();
@@ -130,7 +130,7 @@ verifier.verify = function (email, options, callback) {
                   if (response.indexOf('250') > -1 && !ended) {
                     // MAIL Worked
                     socket.write('RCPT TO:<' + email + '>\r\n', function () {
-                      stage++;
+                      return stage++;
                     });
                   } else {
                     socket.end();
@@ -150,7 +150,7 @@ verifier.verify = function (email, options, callback) {
                   socket.end();
               }
             }
-          }).on('connect', function (data) {}).on('error', function (err) {
+          }).on('error', function (err) {
             ended = true;
             cb(err, { success: false, info: null, addr: email });
           }).on('end', function () {

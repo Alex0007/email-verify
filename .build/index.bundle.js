@@ -55,7 +55,7 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
   }
 
   // Get the MX Records to find the SMTP server
-  dns.resolveMx(domain, function (err, addresses) {
+  dns.resolveMx(domain, (err, addresses) => {
     if (err || (typeof addresses === 'undefined')) {
       cb(err, null)
     } else if (addresses && addresses.length <= 0) {
@@ -81,13 +81,13 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
       let ended = false
 
       if (options.timeout > 0) {
-        socket.setTimeout(options.timeout, function () {
+        socket.setTimeout(options.timeout, () => {
           cb(null, { success: false, info: 'Connection Timed Out', addr: email })
           socket.destroy()
         })
       }
 
-      socket.on('data', function (data) {
+      socket.on('data', (data) => {
         log += response = data.toString()
         completed = response.slice(-1) === '\n'
 
@@ -96,9 +96,7 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
             case 0:
               if (response.indexOf('220') > -1 && !ended) {
                 // Connection Worked
-                socket.write('EHLO ' + options.fqdn + '\r\n', function () {
-                  stage++
-                })
+                socket.write('EHLO ' + options.fqdn + '\r\n', () => stage++)
               } else {
                 socket.end()
               }
@@ -106,9 +104,7 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
             case 1:
               if (response.indexOf('250') > -1 && !ended) {
                 // Connection Worked
-                socket.write('MAIL FROM:<' + options.sender + '>\r\n', function () {
-                  stage++
-                })
+                socket.write('MAIL FROM:<' + options.sender + '>\r\n', () => stage++)
               } else {
                 socket.end()
               }
@@ -116,9 +112,7 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
             case 2:
               if (response.indexOf('250') > -1 && !ended) {
                 // MAIL Worked
-                socket.write('RCPT TO:<' + email + '>\r\n', function () {
-                  stage++
-                })
+                socket.write('RCPT TO:<' + email + '>\r\n', () => stage++)
               } else {
                 socket.end()
               }
@@ -137,12 +131,10 @@ verifier.verify = (email, options, callback) => new Promise((resolve, reject) =>
               socket.end()
           }
         }
-      }).on('connect', function (data) {
-
-      }).on('error', function (err) {
+      }).on('error', (err) => {
         ended = true
         cb(err, { success: false, info: null, addr: email })
-      }).on('end', function () {
+      }).on('end', () => {
         ended = true
         cb(null, {
           success: success,
