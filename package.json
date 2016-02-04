@@ -23,7 +23,7 @@
   "scripts": {
     "postinstall": "pick-precompiled",
     "build": "precompile",
-    "test": "npm run syntax && npm run postinstall && node -r babel-core/register test/",
+    "test": "npm run syntax && npm run postinstall && node test/",
     "syntax": "standard --verbose | snazzy"
   },
   "engines": {
