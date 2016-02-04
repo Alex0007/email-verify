@@ -1,6 +1,6 @@
 import test from 'tape'
 import tapSpec from 'tap-spec'
-import verifier from '../lib/'
+import verifier from '../.build/index'
 
 test.createStream().pipe(tapSpec()).pipe(process.stdout)
 
